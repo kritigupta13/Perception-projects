@@ -1,0 +1,2 @@
+
+-DCATKIN_DEVEL_PREFIX=/home/laukik/Perception-projects/devel -DCMAKE_INSTALL_PREFIX=/home/laukik/Perception-projects/install -G Unix Makefiles
