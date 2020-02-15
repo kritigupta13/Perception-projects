@@ -1,0 +1,4 @@
+<launch>
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <node pkg="project_3" type="src/part_a/src/turtlebot_driver.py" name="turtlebot_driver" />
+</launch>
