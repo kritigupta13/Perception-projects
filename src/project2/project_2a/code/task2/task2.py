@@ -4,7 +4,7 @@ import glob
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def df_to_param(x):
+def df_to_param(x, mat = 0):
     n = len(x)
     check = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '.', 'e']
     x = x[1:n-1]
@@ -28,9 +28,11 @@ def df_to_param(x):
             i+=1
     print(out)
     if(len(out) == 1):
-        return np.matrix(out[0])
-    else:
+        out = out[0]
+    if(mat == 1):
         return np.matrix(out)
+    elif(mat == 0):
+        return out
 
 ROWS = 9
 COLS = 6
@@ -38,16 +40,16 @@ base_folder = "D:/ASU/CSE598 - Perception in Robotics/project_2a/"
 
 left_int = pd.read_csv(base_folder+'parameters/left_camera_intrinsics.csv')
 mtxl = left_int['Camera Matrix'][0]
-mtxl = df_to_param(mtxl)
+mtxl = df_to_param(mtxl, mat=1)
 distl = left_int['Distortion Coefficient'][0]
-distl = df_to_param(distl)
+distl = df_to_param(distl, mat=1)
 
 
 right_int = pd.read_csv(base_folder+'parameters/right_camera_intrinsics.csv')
 mtxr = right_int['Camera Matrix'][0]
-mtxr = df_to_param(mtxr)
+mtxr = df_to_param(mtxr, mat=1)
 distr = right_int['Distortion Coefficient'][0]
-distr = df_to_param(distr)
+distr = df_to_param(distr, mat=1)
 
 #Step 1 Init
 print("-- Task 2 --")
@@ -85,6 +87,14 @@ retval, camMat1, distC1, camMat2, distC2, R, T, E, F = cv2.stereoCalibrate(obj_p
                            mtxl, distl, mtxr, distr, img2.shape[::-1], flags = cv2.CALIB_FIX_INTRINSIC,
                            criteria=term_criteria)
 
+stereo_cal = {'Camera Matrix 1': [camMat1], 
+              'Distortion Coefficient 1': [distC1], 
+              'Camera Matrix 2': [camMat2], 
+              'Distortion Coefficient 2': [distC2], 
+              'R': [R], 'T': [T], 'E': [E], 'F': [F]}
+df_cal = pd.DataFrame(data = stereo_cal)
+df_cal.to_csv(base_folder+'parameters/stereo_calibration.csv', index = False)
+
 result_left0 = cv2.undistortPoints(temp11, mtxl, distl)
 result_left1 = cv2.undistortPoints(temp12, mtxr, distr)
 
@@ -104,6 +114,10 @@ ax.scatter3D(cpoints[0,:], cpoints[1,:], cpoints[2,:], c=cpoints[2,:], cmap='vir
 plt.draw()
 '''
 rotation1, rotation2, pose1, pose2 = cv2.stereoRectify(camMat1, distC1, camMat2, distC2, img2.shape[::-1], R, T)[0:4]
+
+stereo_rect = {'Rotation 1': [rotation1], 'Rotation 2': [rotation2], 'Pose 1': [pose1], 'Pose 2': [pose2]}
+df_rect = pd.DataFrame(data = stereo_rect)
+df_rect.to_csv(base_folder+'parameters/stereo_rectification.csv', index = False)
 
 mapX0, mapY0 = cv2.initUndistortRectifyMap(camMat1, distC1, None, None, img2.shape, 5)
 mapX1, mapY1 = cv2.initUndistortRectifyMap(camMat2, distC2, None, None, img2.shape, 5)
