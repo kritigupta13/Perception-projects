@@ -7,6 +7,14 @@ Created on Mon Mar  2 22:42:12 2020
 """Import necessary packages"""
 
 import numpy as np
+import sys
+
+ros_path = '/opt/ros/kinetic/lib/python2.7/dist-packages'
+if ros_path in sys.path:
+    sys.path.remove(ros_path)
+import cv2
+sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages')
+
 import cv2
 import glob
 from matplotlib import pyplot as plt
@@ -14,10 +22,12 @@ import copy
 
 from scipy import ndimage as ndi
 import matplotlib.pyplot as plt
+
 from skimage.feature import peak_local_max
 from skimage import data, img_as_float
-#import ipdb
+import ipdb
 
+import pandas as pd
 
 ROWS = 9
 COLS = 6
@@ -25,10 +35,18 @@ N = 11
 
 """Step (1): Load the images and camera parameters. """
 
-left = glob.glob(r"C:\Users\ishan\Downloads\project_2a\project_2a\images\task_1\left_*.png")
+path="/home/laukik/Perception-projects/src/project2/project_2a"
+left = glob.glob(path+"/images/task_1/left_*.png")
 left.sort()
-right = glob.glob(r"C:\Users\ishan\Downloads\project_2a\project_2a\images\task_1\right_*.png")
+right = glob.glob(path+"/images/task_1/right_*.png")
 right.sort()
+
+
+#left = glob.glob(r"C:\Users\ishan\Downloads\project_2a\project_2a\images\task_1\left_*.png")
+#left.sort()
+#right = glob.glob(r"C:\Users\ishan\Downloads\project_2a\project_2a\images\task_1\right_*.png")
+#right.sort()
+
 
 obj_p = np.zeros((ROWS*COLS, 3), np.float32)
 obj_p[:,:2] = np.mgrid[0:ROWS, 0:COLS].T.reshape(-1, 2)
@@ -66,9 +84,15 @@ undistorted_right=[]
 
 """detect ORB feature points on each image, using the OpenCV library "ORB" class."""
 
-left = glob.glob(r"C:\Users\ishan\Downloads\project_2a\project_2a\images\task_3_and_4\left_*.png")
+#left = glob.glob(r"C:\Users\ishan\Downloads\project_2a\project_2a\images\task_3_and_4\left_*.png")
+#left.sort()
+#right = glob.glob(r"C:\Users\ishan\Downloads\project_2a\project_2a\images\task_3_and_4\right_*.png")
+#right.sort()
+
+path="/home/laukik/Perception-projects/src/project2/project_2a/images/task_3_and_4/"
+left = glob.glob(path+"/left_*.png")
 left.sort()
-right = glob.glob(r"C:\Users\ishan\Downloads\project_2a\project_2a\images\task_3_and_4\right_*.png")
+right = glob.glob(path+"/right_*.png")
 right.sort()
 
 for i in range(0,N):
@@ -86,10 +110,10 @@ for i in range(0,N):
     keypoints_R, descriptor_R = orb.detectAndCompute(imgR, None)
     
     Keypoints_Image_L	=	cv2.drawKeypoints(	imgL,keypoints_L,None,color=[0,255,0],flags=cv2.DrawMatchesFlags_DEFAULT)
-    plt.imshow(Keypoints_Image_L),plt.show()
+    plt.imshow(Keypoints_Image_L)#,plt.show()
     
     Keypoints_Image_R	=	cv2.drawKeypoints(	imgR,keypoints_R,None,color=[0,0,150],flags=cv2.DrawMatchesFlags_DEFAULT)
-    plt.imshow(Keypoints_Image_R),plt.show()
+    plt.imshow(Keypoints_Image_R)#,plt.show()
     coordinates_L = peak_local_max(imgL, min_distance=20)
     coordinates_R = peak_local_max(imgR, min_distance=20)
 #    Keypoints_Image_L	=	cv2.drawKeypoints(	imgL,coordinates_L,None,color=[0,255,0],flags=cv2.DrawMatchesFlags_DEFAULT)
@@ -102,11 +126,60 @@ for i in range(0,N):
     matches = bf.match(descriptor_L,descriptor_R)
     matches = sorted(matches, key = lambda x:x.distance)
     img3 = cv2.drawMatches(imgL,keypoints_L,imgR,keypoints_R,matches[:20],None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-    plt.imshow(img3),plt.show()
+    plt.imshow(img3)#,plt.show()
 
     
 #Part 5 (Laukik has written the following lines)
 
+def df_to_param(x, mat = 0):
+    n = len(x)
+    check = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '.', 'e']
+    x = x[1:n-1]
+    out = []
+    i = 0
+    while(i<n-2):
+        if(x[i] == '['):
+            new = []
+        if(x[i] in check):
+            temp = x[i]
+            i += 1
+            while(x[i] in check):
+                temp += x[i]
+                i += 1
+            temp = float(temp)
+            new.append(temp)
+        elif(x[i] == ']'):
+            out.append(new)
+            i+=1
+        else:
+            i+=1
+    print(out)
+    if(len(out) == 1):
+        out = out[0]
+    if(mat == 1):
+        return np.matrix(out)
+    elif(mat == 0):
+        return out
+
+
+
+
+path="/home/laukik/Perception-projects/src/project2/project_2a/" #@ishani you should change this
+
+stereo_rect=pd.read_csv(path+'parameters/stereo_rectification.csv')
+R1=stereo_rect['Rotation 1'][0]
+R1=df_to_param(R1,mat=1)
+
+R2=stereo_rect['Rotation 2'][0]
+R2=df_to_param(R2,mat=1)
+
+p1=stereo_rect['Pose 1'][0]
+p1=df_to_param(p1,mat=1)
+
+p2=stereo_rect['Pose 2'][0]
+p2=df_to_param(p2,mat=1)
+
+ipdb.set_trace()
 
 
 
