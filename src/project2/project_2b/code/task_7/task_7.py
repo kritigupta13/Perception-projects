@@ -12,6 +12,7 @@ import glob
 import pandas as pd
 
 from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 ROWS = 9
 COLS = 6
@@ -67,8 +68,8 @@ distl = df_to_param(distl, mat=1)
 
 b=62 #In mm units
 fsx=423.27384816 #Obtained from the camera matrix
-#Projection Matrix
-P=[[fsx,0,0,0],[0,fsx,0,0],[0,0,1,0]]
+
+
 
 for i in range(10):
     left=base_folder+left_path+str(i)+'.png'
@@ -97,10 +98,12 @@ for i in range(10):
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
     matches = bf.match(descriptor_L,descriptor_R)
     matches = sorted(matches, key = lambda x:x.distance)
-    img3 = cv2.drawMatches(imgL,keypoints_L,imgR,keypoints_R,matches[:20],None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-    plt.imshow(img3)
-
-
+    img3 = cv2.drawMatches(imgL,keypoints_L,imgR,keypoints_R,matches,None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    
+    #This is matched without outlier masking
+    #plt.imshow(img3)
+    #plt.title('Without Inlier Calculation')
+    #plt.show()
     
 
     left_pts = np.float32([keypoints_L[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
@@ -108,7 +111,22 @@ for i in range(10):
 
     essential_matrix=cv2.findEssentialMat(left_pts,right_pts,mtxl)
 
+    mask=essential_matrix[1]
     essential_matrix=essential_matrix[0] #Only the matrix is needed
+
+    '''
+    inlier_matches=[]
+    for i in range(len(matches)):
+        if(mask[i][0]==1):
+            inlier_matches.append(matches[i])
+    '''
+
+    #This considers only inlier matches
+    inlier_img3=cv2.drawMatches(imgL,keypoints_L,imgR,keypoints_R,matches,None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS,matchesMask=mask.ravel().tolist())
+    
+    #plt.imshow(inlier_img3)
+    #plt.title('Inlier matching')
+    #plt.show()
 
     info=cv2.recoverPose(essential_matrix,   left_pts,right_pts)
 
@@ -116,9 +134,59 @@ for i in range(10):
     R=info[1]
     t=info[2]
 
-    import ipdb
-    ipdb.set_trace()    
+    #Projection matrices
+    P1=np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0]])
+    P2=R.tolist()
+    P2[0].append(t[0][0])
+    P2[1].append(t[1][0])
+    P2[2].append(t[2][0])
+    P2=np.array(P2)
 
+    pts4D=cv2.triangulatePoints(P1,P2,left_pts,right_pts)
+    pts3D = pts4D[:3,:]/np.repeat(pts4D[3,:], 3).reshape(3,-1) #Obtain the points in 3D
+
+    Ys = pts3D[1,:]
+    Zs = pts3D[2,:]
+    Xs = pts3D[0,:]
+
+
+    '''
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    
+    '''
+    
+    '''
+    #Display camera poses
+    C1_start=[0,0,0]
+    C1_end=[0,0.06,0]
+
+    C2_start=t
+    C2_end=t+np.matmul(R,C1_end)
+
+    cam_x_start=[C1_start[0],C2_start[0][0]]
+    cam_y_start=[C1_start[1],C2_start[1][0]]
+    cam_z_start=[C1_start[2],C2_start[2][0]]
+
+    cam_x_end=[C1_end[0],C2_end[0][0]]
+    cam_y_end=[C1_end[1],C2_end[1][0]]
+    cam_z_end=[C1_end[2],C2_end[2][0]]
+    '''
+
+    '''
+    ax.scatter(Xs, Ys, Zs, c='r', marker='o')
+    #ax.scatter(cam_x_start,cam_y_start,cam_z_start,c='b',marker='o')
+    #ax.scatter(cam_x_end,cam_y_end,cam_z_end,c='g',marker='o')
+    ax.set_xlabel('Y')
+    ax.set_ylabel('Z')
+    ax.set_zlabel('X')
+    plt.title('3D point cloud: Use pan axes button below to inspect')
+    #plt.show()
+    '''
+
+    import ipdb
+    ipdb.set_trace()
+    
     #plt.show()
 
 
