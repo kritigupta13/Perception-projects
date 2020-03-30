@@ -101,9 +101,9 @@ for i in range(10):
     img3 = cv2.drawMatches(imgL,keypoints_L,imgR,keypoints_R,matches,None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
     
     #This is matched without outlier masking
-    #plt.imshow(img3)
-    #plt.title('Without Inlier Calculation')
-    #plt.show()
+    plt.imshow(img3)
+    plt.title('Without Inlier Calculation')
+    plt.show()
     
 
     left_pts = np.float32([keypoints_L[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
@@ -124,9 +124,9 @@ for i in range(10):
     #This considers only inlier matches
     inlier_img3=cv2.drawMatches(imgL,keypoints_L,imgR,keypoints_R,matches,None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS,matchesMask=mask.ravel().tolist())
     
-    #plt.imshow(inlier_img3)
-    #plt.title('Inlier matching')
-    #plt.show()
+    plt.imshow(inlier_img3)
+    plt.title('Inlier matching')
+    plt.show()
 
     info=cv2.recoverPose(essential_matrix,   left_pts,right_pts)
 
@@ -150,11 +150,11 @@ for i in range(10):
     Xs = pts3D[0,:]
 
 
-    '''
+    
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     
-    '''
+    
     
     '''
     #Display camera poses
@@ -173,7 +173,7 @@ for i in range(10):
     cam_z_end=[C1_end[2],C2_end[2][0]]
     '''
 
-    '''
+    
     ax.scatter(Xs, Ys, Zs, c='r', marker='o')
     #ax.scatter(cam_x_start,cam_y_start,cam_z_start,c='b',marker='o')
     #ax.scatter(cam_x_end,cam_y_end,cam_z_end,c='g',marker='o')
@@ -181,11 +181,9 @@ for i in range(10):
     ax.set_ylabel('Z')
     ax.set_zlabel('X')
     plt.title('3D point cloud: Use pan axes button below to inspect')
-    #plt.show()
-    '''
+    plt.show()
 
-    import ipdb
-    ipdb.set_trace()
+
     
     #plt.show()
 
