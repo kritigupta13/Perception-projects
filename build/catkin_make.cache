@@ -1,2 +1,2 @@
-
+project_3:project_3b/human_description:project_3b/pursuit_evasion
 -DCATKIN_DEVEL_PREFIX=/home/laukik/Perception-projects/devel -DCMAKE_INSTALL_PREFIX=/home/laukik/Perception-projects/install -G Unix Makefiles

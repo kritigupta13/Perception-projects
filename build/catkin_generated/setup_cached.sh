@@ -7,7 +7,7 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/laukik/Perception-projects/devel:$CMAKE_PREFIX_PATH"
+export LD_LIBRARY_PATH="/home/laukik/Perception-projects/devel/lib:/home/laukik/catkin_ws/devel/lib:/opt/ros/kinetic/lib:/opt/ros/kinetic/lib/x86_64-linux-gnu:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64"
+export PATH="/opt/ros/kinetic/bin:/usr/local/cuda/bin:/home/laukik/bin:/home/laukik/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+export PKG_CONFIG_PATH="/home/laukik/Perception-projects/devel/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PWD="/home/laukik/Perception-projects/build"
-export ROSLISP_PACKAGE_DIRECTORIES="/home/laukik/Perception-projects/devel/share/common-lisp:$ROSLISP_PACKAGE_DIRECTORIES"
-export ROS_PACKAGE_PATH="/home/laukik/Perception-projects/src:$ROS_PACKAGE_PATH"

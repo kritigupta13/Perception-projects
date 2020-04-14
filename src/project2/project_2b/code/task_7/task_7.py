@@ -101,9 +101,9 @@ for i in range(10):
     img3 = cv2.drawMatches(imgL,keypoints_L,imgR,keypoints_R,matches,None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
     
     #This is matched without outlier masking
-    plt.imshow(img3)
-    plt.title('Without Inlier Calculation')
-    plt.show()
+    #plt.imshow(img3)
+    #plt.title('Without Inlier Calculation')
+    #plt.show()
     
 
     left_pts = np.float32([keypoints_L[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
@@ -124,9 +124,9 @@ for i in range(10):
     #This considers only inlier matches
     inlier_img3=cv2.drawMatches(imgL,keypoints_L,imgR,keypoints_R,matches,None,flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS,matchesMask=mask.ravel().tolist())
     
-    plt.imshow(inlier_img3)
-    plt.title('Inlier matching')
-    plt.show()
+    #plt.imshow(inlier_img3)
+    #plt.title('Inlier matching')
+    #plt.show()
 
     info=cv2.recoverPose(essential_matrix,   left_pts,right_pts)
 
@@ -153,16 +153,44 @@ for i in range(10):
     
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    
-    
-    
-    '''
+
+    def draw_camera(start,direction):
+        #Both inputs are arrays
+        dx,dy=0.1,0.1
+        height=0.1
+        centroid=start+height*direction/np.linalg.norm(direction)
+
+        d1,d2,d3=direction[:],direction[:],direction[:]
+        
+        import ipdb
+        ipdb.set_trace()
+        
+        d1[0][0]+=0.1
+        d2[1][0]+=0.1
+        d3[1][0]+=0.1
+
+        vx,vy,vz=[],[],[]
+        for i in np.linspace(0,height,num=100):
+            p1=start+d1*i
+            p2=start+d2*i
+            p3=start+d3*i
+
+            vx.extend([p1[0][0],p2[0][0],p3[0][0]])
+            vy.extend([p1[1][0],p2[1][0],p3[1][0]])
+            vz.extend([p1[2][0],p2[2][0],p3[2][0]])
+            import ipdb
+            ipdb.set_trace()
+
+
     #Display camera poses
     C1_start=[0,0,0]
-    C1_end=[0,0.06,0]
+    C1_end=[0,1,0] #Direction
 
     C2_start=t
-    C2_end=t+np.matmul(R,C1_end)
+    C2_end=t+np.matmul(R,C1_end).reshape(3,1) #Direction
+
+    draw_camera(C2_start,C2_end)
+
 
     cam_x_start=[C1_start[0],C2_start[0][0]]
     cam_y_start=[C1_start[1],C2_start[1][0]]
@@ -171,7 +199,7 @@ for i in range(10):
     cam_x_end=[C1_end[0],C2_end[0][0]]
     cam_y_end=[C1_end[1],C2_end[1][0]]
     cam_z_end=[C1_end[2],C2_end[2][0]]
-    '''
+    
 
     
     ax.scatter(Xs, Ys, Zs, c='r', marker='o')

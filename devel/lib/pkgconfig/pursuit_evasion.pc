@@ -1,0 +1,8 @@
+prefix=/home/laukik/Perception-projects/devel
+
+Name: pursuit_evasion
+Description: Description of pursuit_evasion
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
